@@ -18,7 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window.backgroundColor = .white
     window.makeKeyAndVisible()
 
-    let viewController = GitHubSearchViewController()
+    let githubService = GitHubService()
+    let viewController = GitHubSearchViewController(githubService: githubService)
     let navigationController = UINavigationController(rootViewController: viewController)
     window.rootViewController = navigationController
 
