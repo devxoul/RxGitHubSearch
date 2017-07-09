@@ -8,8 +8,12 @@
 
 import UIKit
 
+import RxCocoa
+import RxSwift
+
 class GitHubSearchViewController: UIViewController {
   fileprivate let githubService: GitHubService
+  fileprivate var disposeBag = DisposeBag()
 
   fileprivate let tableView = UITableView()
   fileprivate let searchBar = UISearchBar()
@@ -39,7 +43,17 @@ class GitHubSearchViewController: UIViewController {
   }
 
   func bind() {
-
+    self.searchBar.rx.text.changed
+      .throttle(0.3, scheduler: MainScheduler.instance)
+      .flatMapLatest { [weak self] query -> Observable<[String]> in
+        guard let `self` = self else { return .just([]) }
+        guard let query = query else { return .just([]) }
+        return self.githubService.search(query: query)
+      }
+      .bind(to: self.tableView.rx.items(cellIdentifier: "cell")) { row, name, cell in
+        cell.textLabel?.text = name
+      }
+      .disposed(by: self.disposeBag)
   }
 
   override func viewDidLayoutSubviews() {
